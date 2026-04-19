@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>This Week / Next Week</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #1a56db;
+    --blue-light: #e8f0fd;
+    --blue-dark: #1240a8;
+    --text: #1a1a2e;
+    --text-muted: #6b7280;
+    --text-hint: #9ca3af;
+    --border: #e5e7eb;
+    --border-focus: #1a56db;
+    --bg: #f8f9fc;
+    --surface: #ffffff;
+    --success: #059669;
+    --success-bg: #ecfdf5;
+    --error: #dc2626;
+    --error-bg: #fef2f2;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Sarabun', 'IBM Plex Sans Thai', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .page-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .logo-badge {
+    background: var(--blue);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  .page-header h1 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .page-header .hint {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-hint);
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: var(--blue);
+    border-radius: 2px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+
+  .field label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .field select,
+  .field input[type="date"] {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .field select:focus,
+  .field input[type="date"]:focus {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.08);
+  }
+
+  .loading-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-top: 4px;
+    min-height: 16px;
+  }
+
+  .spinner {
+    width: 12px; height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Table */
+  .section-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .tag-this { background: #dbeafe; color: #1d4ed8; }
+  .tag-next { background: #fef3c7; color: #92400e; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 0.5rem;
+  }
+
+  thead th {
+    background: #f3f4f6;
+    padding: 9px 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--border);
+  }
+
+  tbody td {
+    border: 1px solid var(--border);
+    padding: 0;
+  }
+
+  tbody td input {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: transparent;
+    transition: background 0.1s;
+  }
+
+  tbody td input:focus {
+    background: var(--blue-light);
+  }
+
+  tbody tr:hover td { background: #fafafa; }
+  tbody tr:hover td input:focus { background: var(--blue-light); }
+
+  .btn-add-row {
+    background: none;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    width: 100%;
+    padding: 7px;
+    font-size: 12px;
+    color: var(--text-hint);
+    cursor: pointer;
+    margin-top: 4px;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+
+  .btn-add-row:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--blue-light);
+  }
+
+  /* Footer actions */
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+  }
+
+  .btn-submit {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 28px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+
+  .btn-submit:hover { background: var(--blue-dark); }
+  .btn-submit:active { transform: scale(0.98); }
+
+  .btn-clear {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 20px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-clear:hover { border-color: var(--text-muted); color: var(--text); }
+
+  .alert {
+    display: none;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 1rem;
+  }
+
+  .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid #a7f3d0; }
+  .alert-error { background: var(--error-bg); color: var(--error); border: 1px solid #fecaca; }
+
+  /* Page 2 — summary tables */
+  .page-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2rem 0 1.5rem;
+  }
+  .page-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .page-divider-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .summary-table tbody td {
+    padding: 9px 12px;
+    font-size: 13px;
+    color: var(--text);
+    border: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .summary-table tbody td.editable { padding: 0; }
+  .summary-table tbody td.editable input {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: transparent;
+    transition: background 0.1s;
+  }
+  .summary-table tbody td.editable input:focus { background: var(--blue-light); }
+
+  .summary-empty {
+    text-align: center;
+    padding: 2rem;
+    font-size: 13px;
+    color: var(--text-hint);
+  }
+
+  .reload-btn {
+    font-size: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: inherit;
+    margin-left: auto;
+    transition: all 0.15s;
+  }
+  .reload-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+  @media (max-width: 540px) {
+    .meta-grid { grid-template-columns: 1fr; }
+    .page-header .hint { display: none; }
+    thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
+    .container { padding: 1rem 1rem 3rem; }
+    .page-header { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <span class="logo-badge">PWT &amp; UNIQUE</span>
+  <h1>This Week / Next Week</h1>
+  <span class="hint">ขอความกรุณากรอกก่อนวันประชุมในแต่ละสัปดาห์</span>
+</header>
+
+<div class="container">
+
+  <!-- Member + Date -->
+  <div class="card">
+    <div class="card-title">ข้อมูลสมาชิก</div>
+    <div class="meta-grid">
+      <div class="field">
+        <label>ชื่อสมาชิก</label>
+        <select id="name-select">
+          <option value="">— กำลังโหลดรายชื่อ... —</option>
+        </select>
+        <div class="loading-row">
+          <div class="spinner" id="spinner"></div>
+          <span id="load-status"></span>
+        </div>
+      </div>
+      <div class="field">
+        <label>วันที่</label>
+        <input type="date" id="date" />
+      </div>
+    </div>
+  </div>
+
+  <!-- This Week -->
+  <div class="card">
+    <div class="section-label">
+      <span class="week-tag tag-this">THIS WEEK</span>
+      บริษัทที่เข้าพบสัปดาห์นี้
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:35%">บริษัทที่พบ</th>
+          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+          <th style="width:37%">แนะนำให้เพื่อนได้ (ชื่อสมาชิก)</th>
+        </tr>
+      </thead>
+      <tbody id="tw-body"></tbody>
+    </table>
+    <button class="btn-add-row" onclick="addRow('tw-body')">+ เพิ่มแถว</button>
+  </div>
+
+  <!-- Next Week -->
+  <div class="card">
+    <div class="section-label">
+      <span class="week-tag tag-next">NEXT WEEK</span>
+      บริษัทที่วางแผนเข้าพบสัปดาห์หน้า
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:35%">บริษัทที่พบ</th>
+          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+          <th style="width:37%">แนะนำให้เพื่อนได้ (ชื่อสมาชิก)</th>
+        </tr>
+      </thead>
+      <tbody id="nw-body"></tbody>
+    </table>
+    <button class="btn-add-row" onclick="addRow('nw-body')">+ เพิ่มแถว</button>
+  </div>
+
+  <!-- ── PAGE 2 DIVIDER ── -->
+  <div class="page-divider">
+    <div class="page-divider-line"></div>
+    <span class="page-divider-label">สรุปภาพรวมสมาชิก</span>
+    <div class="page-divider-line"></div>
+  </div>
+
+  <!-- Summary: This Week visited -->
+  <div class="card">
+    <div class="section-label" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="week-tag tag-this">THIS WEEK</span>
+        รายชื่อบริษัทที่เพื่อนสมาชิกได้เข้าพบแล้ว
+      </div>
+      <button class="reload-btn" onclick="loadTWNW()">↻ รีเฟรช</button>
+    </div>
+    <div id="tw-summary-status" class="loading-row">
+      <div class="spinner" id="spinner-tw" style="display:block"></div>
+      <span id="tw-summary-msg">กำลังโหลด...</span>
+    </div>
+    <table class="summary-table" id="tw-summary-table" style="display:none">
+      <thead>
+        <tr>
+          <th style="width:33%">บริษัทที่เข้าพบ</th>
+          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+          <th style="width:39%">ผู้ที่พบ</th>
+        </tr>
+      </thead>
+      <tbody id="tw-summary-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Summary: Next Week planned -->
+  <div class="card">
+    <div class="section-label">
+      <span class="week-tag tag-next">NEXT WEEK</span>
+      รายชื่อบริษัทที่เพื่อนสมาชิกเตรียมเข้าพบ
+    </div>
+    <div id="nw-summary-status" class="loading-row">
+      <div class="spinner" id="spinner-nw" style="display:block"></div>
+      <span id="nw-summary-msg">กำลังโหลด...</span>
+    </div>
+    <table class="summary-table" id="nw-summary-table" style="display:none">
+      <thead>
+        <tr>
+          <th style="width:33%">บริษัทที่เข้าพบ</th>
+          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+          <th style="width:39%">ผู้ที่จะเข้าพบ</th>
+        </tr>
+      </thead>
+      <tbody id="nw-summary-body"></tbody>
+    </table>
+  </div>
+
+  <div class="actions">
+    <button class="btn-submit" onclick="submitForm()">ส่งข้อมูล →</button>
+    <button class="btn-clear" onclick="clearForm()">ล้างข้อมูล</button>
+  </div>
+  <div class="alert alert-success" id="success-msg">✓ ส่งข้อมูลเรียบร้อยแล้ว ขอบคุณครับ!</div>
+  <div class="alert alert-error" id="error-msg"></div>
+
+</div>
+
+<script>
+  /* ── CONFIG (แก้ที่นี่ที่เดียว) ── */
+  const SHEET_ID   = '1FHGRQpQ1yOsHSdsiA5RtycgItH6t6SwvDitE6BWcKlE';
+  const TAB_NAME   = 'member list';
+  const COL_FIRST  = 'First Name';
+  const COL_LAST   = 'Last Name';
+  const COL_NICK   = '(Nick Name)';
+  const TAB_TWNW   = 'TWNW';
+  const COL_BIZ    = 'บริษัทที่เข้าพบ';
+  const COL_POS    = 'ตำแหน่ง / ฝ่ายที่เข้าพบ';
+  const COL_WEEK   = 'สัปดาห์';
+  /* ─────────────────────────────── */
+
+  document.getElementById('date').value = new Date().toISOString().split('T')[0];
+  ['tw-body','nw-body'].forEach(id => { for (let i=0;i<4;i++) addRow(id); });
+
+  function addRow(id) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" placeholder="ชื่อบริษัท" /></td>
+      <td><input type="text" placeholder="ตำแหน่ง / ฝ่าย" /></td>
+      <td><input type="text" placeholder="ชื่อเพื่อนสมาชิก" /></td>`;
+    document.getElementById(id).appendChild(tr);
+  }
+
+  async function loadMembers() {
+    const spinner = document.getElementById('spinner');
+    const status  = document.getElementById('load-status');
+    const sel     = document.getElementById('name-select');
+
+    spinner.style.display = 'block';
+    status.textContent = 'กำลังโหลดรายชื่อ...';
+
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TAB_NAME)}`;
+
+    try {
+      const res  = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+
+      const cols   = json.table.cols.map(c => c.label);
+      const iFirst = cols.indexOf(COL_FIRST);
+      const iLast  = cols.indexOf(COL_LAST);
+      const iNick  = cols.indexOf(COL_NICK);
+
+      if (iFirst === -1 || iLast === -1) throw new Error(`ไม่พบ column "${COL_FIRST}" หรือ "${COL_LAST}"`);
+
+      const members = json.table.rows
+        .map(r => {
+          const first = r.c[iFirst]?.v || '';
+          const last  = r.c[iLast]?.v  || '';
+          const nick  = (iNick !== -1 && r.c[iNick]?.v) ? r.c[iNick].v : '';
+          const label = nick
+            ? `${first} ${last} (${nick})`
+            : `${first} ${last}`;
+          return label.trim();
+        })
+        .filter(Boolean)
+        .sort((a,b) => a.localeCompare(b, 'th'));
+
+      sel.innerHTML =
+        '<option value="">— เลือกชื่อ —</option>' +
+        members.map(m => `<option value="${m}">${m}</option>`).join('');
+
+      status.textContent = `โหลดได้ ${members.length} คน`;
+      spinner.style.display = 'none';
+
+    } catch (e) {
+      sel.innerHTML = '<option value="">— โหลดไม่สำเร็จ —</option>';
+      status.textContent = '⚠ ' + e.message;
+      spinner.style.display = 'none';
+      console.error(e);
+    }
+  }
+
+  function getTableData(id) {
+    return [...document.querySelectorAll(`#${id} tr`)]
+      .map(r => [...r.querySelectorAll('input')].map(i => i.value.trim()))
+      .filter(r => r.some(v => v));
+  }
+
+  function submitForm() {
+    const name = document.getElementById('name-select').value;
+    const date = document.getElementById('date').value;
+    const errEl = document.getElementById('error-msg');
+
+    if (!name) {
+      errEl.textContent = '⚠ กรุณาเลือกชื่อก่อนส่ง';
+      errEl.style.display = 'block';
+      setTimeout(() => errEl.style.display = 'none', 3000);
+      return;
+    }
+
+    const payload = {
+      name, date,
+      thisWeek: getTableData('tw-body'),
+      nextWeek: getTableData('nw-body')
+    };
+
+    console.log('TWNW Submit:', payload);
+
+    /* 
+      ── ส่งข้อมูลไปยัง backend / Google Apps Script ──
+      ตัวอย่าง: fetch('YOUR_APPS_SCRIPT_URL', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+    */
+
+    const ok = document.getElementById('success-msg');
+    ok.style.display = 'block';
+    setTimeout(() => ok.style.display = 'none', 5000);
+  }
+
+  function clearForm() {
+    document.getElementById('name-select').selectedIndex = 0;
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    ['tw-body','nw-body'].forEach(id => {
+      const el = document.getElementById(id);
+      el.innerHTML = '';
+      for (let i=0;i<4;i++) addRow(id);
+    });
+  }
+
+  async function loadTWNW() {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TAB_TWNW)}`;
+
+    ['tw','nw'].forEach(p => {
+      document.getElementById(`${p}-summary-table`).style.display = 'none';
+      document.getElementById(`${p}-summary-status`).style.display = 'flex';
+      document.getElementById(`spinner-${p}`).style.display = 'block';
+      document.getElementById(`${p}-summary-msg`).textContent = 'กำลังโหลด...';
+    });
+
+    try {
+      const res  = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+
+      const cols  = json.table.cols.map(c => c.label);
+      const iBiz  = cols.indexOf(COL_BIZ);
+      const iPos  = cols.indexOf(COL_POS);
+      const iWeek = cols.indexOf(COL_WEEK);
+
+      if (iBiz === -1 || iPos === -1 || iWeek === -1)
+        throw new Error(`ไม่พบ column ที่ต้องการใน Tab "${TAB_TWNW}"`);
+
+      const rows = json.table.rows.map(r => ({
+        biz:  r.c[iBiz]?.v  || '',
+        pos:  r.c[iPos]?.v  || '',
+        week: r.c[iWeek]?.v || ''
+      })).filter(r => r.biz);
+
+      const twRows = rows.filter(r => r.week === 'This Week');
+      const nwRows = rows.filter(r => r.week === 'Next Week');
+
+      function renderSummary(data, tbodyId, inputPlaceholder) {
+        const tbody = document.getElementById(tbodyId);
+        tbody.innerHTML = '';
+        if (data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" class="summary-empty">ยังไม่มีข้อมูล</td></tr>`;
+        } else {
+          data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${row.biz}</td>
+              <td>${row.pos}</td>
+              <td class="editable"><input type="text" placeholder="${inputPlaceholder}" /></td>`;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      renderSummary(twRows, 'tw-summary-body', 'ชื่อสมาชิกที่พบ');
+      renderSummary(nwRows, 'nw-summary-body', 'ชื่อสมาชิกที่จะเข้าพบ');
+
+      ['tw','nw'].forEach(p => {
+        document.getElementById(`${p}-summary-status`).style.display = 'none';
+        document.getElementById(`${p}-summary-table`).style.display = 'table';
+      });
+
+    } catch(e) {
+      ['tw','nw'].forEach(p => {
+        document.getElementById(`spinner-${p}`).style.display = 'none';
+        document.getElementById(`${p}-summary-msg`).textContent = '⚠ ' + e.message;
+      });
+      console.error(e);
+    }
+  }
+
+  loadMembers();
+  loadTWNW();
+</script>
+</body>
+</html>
