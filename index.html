@@ -357,9 +357,13 @@
   @media (max-width: 540px) {
     .meta-grid { grid-template-columns: 1fr; }
     .page-header .hint { display: none; }
-    thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
     .container { padding: 1rem 1rem 3rem; }
     .page-header { padding: 0 1rem; }
+    .card { padding: 1rem; }
+    table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    thead th, tbody td { min-width: 100px; white-space: nowrap; }
+    thead th:nth-child(1), tbody td:nth-child(1) { min-width: 120px; }
+    thead th:nth-child(3), tbody td:nth-child(3) { min-width: 130px; }
   }
 </style>
 </head>
@@ -503,10 +507,10 @@
   const COL_LAST   = 'Last Name';
   const COL_NICK   = '(Nick Name)';
   const TAB_TWNW   = 'TWNW';
-  const COL_BIZ    = 'บริษัท';
-  const COL_POS    = 'ตำแหน่ง';
+  const COL_BIZ    = 'บริษัทที่เข้าพบ';
+  const COL_POS    = 'ตำแหน่ง / ฝ่ายที่เข้าพบ';
   const COL_WEEK        = 'Week';
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxGsD-j6fMJxoP_X_lLVPqq6iMfeQLjiQRclOBYZlEf5e2qNYOagD8CPEZKYdOOqS2-w/exec'; // ← วาง URL จาก Apps Script ที่นี่
+  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // ← วาง URL จาก Apps Script ที่นี่
   /* ─────────────────────────────── */
 
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
