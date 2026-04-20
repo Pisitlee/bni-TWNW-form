@@ -461,7 +461,7 @@
         <tr>
           <th style="width:33%">บริษัทที่เข้าพบ</th>
           <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
-          <th style="width:39%">ผู้ที่พบ</th>
+          <th style="width:39%">แนะนำให้เพื่อน</th>
         </tr>
       </thead>
       <tbody id="tw-summary-body"></tbody>
@@ -483,7 +483,7 @@
         <tr>
           <th style="width:33%">บริษัทที่เข้าพบ</th>
           <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
-          <th style="width:39%">ผู้ที่จะเข้าพบ</th>
+          <th style="width:39%">แนะนำให้เพื่อน</th>
         </tr>
       </thead>
       <tbody id="nw-summary-body"></tbody>
@@ -507,10 +507,10 @@
   const COL_LAST   = 'Last Name';
   const COL_NICK   = '(Nick Name)';
   const TAB_TWNW   = 'TWNW';
-  const COL_BIZ    = 'บริษัท';
-  const COL_POS    = 'ตำแหน่ง';
+  const COL_BIZ    = 'บริษัทที่เข้าพบ';
+  const COL_POS    = 'ตำแหน่ง / ฝ่ายที่เข้าพบ';
   const COL_WEEK        = 'Week';
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxGsD-j6fMJxoP_X_lLVPqq6iMfeQLjiQRclOBYZlEf5e2qNYOagD8CPEZKYdOOqS2-w/exec'; // ← วาง URL จาก Apps Script ที่นี่
+  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // ← วาง URL จาก Apps Script ที่นี่
   /* ─────────────────────────────── */
 
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
@@ -669,16 +669,19 @@
       if (iBiz === -1 || iPos === -1 || iWeek === -1)
         throw new Error(`ไม่พบ column ที่ต้องการใน Tab "${TAB_TWNW}"`);
 
+      const iRecommend = cols.indexOf('แนะนำให้เพื่อน');
+
       const rows = json.table.rows.map(r => ({
-        biz:  r.c[iBiz]?.v  || '',
-        pos:  r.c[iPos]?.v  || '',
-        week: r.c[iWeek]?.v || ''
+        biz:       r.c[iBiz]?.v  || '',
+        pos:       r.c[iPos]?.v  || '',
+        week:      r.c[iWeek]?.v || '',
+        recommend: (iRecommend !== -1 && r.c[iRecommend]?.v) ? r.c[iRecommend].v : ''
       })).filter(r => r.biz);
 
       const twRows = rows.filter(r => r.week === 'This Week');
       const nwRows = rows.filter(r => r.week === 'Next Week');
 
-      function renderSummary(data, tbodyId, inputPlaceholder) {
+      function renderSummary(data, tbodyId) {
         const tbody = document.getElementById(tbodyId);
         tbody.innerHTML = '';
         if (data.length === 0) {
@@ -689,14 +692,14 @@
             tr.innerHTML = `
               <td>${row.biz}</td>
               <td>${row.pos}</td>
-              <td class="editable"><input type="text" placeholder="${inputPlaceholder}" /></td>`;
+              <td>${row.recommend}</td>`;
             tbody.appendChild(tr);
           });
         }
       }
 
-      renderSummary(twRows, 'tw-summary-body', 'ชื่อสมาชิกที่พบ');
-      renderSummary(nwRows, 'nw-summary-body', 'ชื่อสมาชิกที่จะเข้าพบ');
+      renderSummary(twRows, 'tw-summary-body');
+      renderSummary(nwRows, 'nw-summary-body');
 
       ['tw','nw'].forEach(p => {
         document.getElementById(`${p}-summary-status`).style.display = 'none';
@@ -707,7 +710,6 @@
       ['tw','nw'].forEach(p => {
         document.getElementById(`spinner-${p}`).style.display = 'none';
         document.getElementById(`${p}-summary-msg`).textContent = '⚠ ' + e.message;
-       
       });
       console.error(e);
     }
