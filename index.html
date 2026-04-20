@@ -707,6 +707,7 @@
       ['tw','nw'].forEach(p => {
         document.getElementById(`spinner-${p}`).style.display = 'none';
         document.getElementById(`${p}-summary-msg`).textContent = '⚠ ' + e.message;
+       
       });
       console.error(e);
     }
