@@ -505,7 +505,8 @@
   const TAB_TWNW   = 'TWNW';
   const COL_BIZ    = 'บริษัทที่เข้าพบ';
   const COL_POS    = 'ตำแหน่ง / ฝ่ายที่เข้าพบ';
-  const COL_WEEK   = 'Week';
+  const COL_WEEK        = 'Week';
+  const APPS_SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE'; // ← วาง URL จาก Apps Script ที่นี่
   /* ─────────────────────────────── */
 
   document.getElementById('date').value = new Date().toISOString().split('T')[0];
@@ -577,10 +578,11 @@
       .filter(r => r.some(v => v));
   }
 
-  function submitForm() {
-    const name = document.getElementById('name-select').value;
-    const date = document.getElementById('date').value;
+  async function submitForm() {
+    const name  = document.getElementById('name-select').value;
+    const date  = document.getElementById('date').value;
     const errEl = document.getElementById('error-msg');
+    const btn   = document.querySelector('.btn-submit');
 
     if (!name) {
       errEl.textContent = '⚠ กรุณาเลือกชื่อก่อนส่ง';
@@ -589,25 +591,44 @@
       return;
     }
 
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+      errEl.textContent = '⚠ กรุณาใส่ APPS_SCRIPT_URL ในโค้ดก่อน';
+      errEl.style.display = 'block';
+      setTimeout(() => errEl.style.display = 'none', 4000);
+      return;
+    }
+
     const payload = {
+      formType: 'TWNW',
       name, date,
       thisWeek: getTableData('tw-body'),
       nextWeek: getTableData('nw-body')
     };
 
-    console.log('TWNW Submit:', payload);
+    btn.disabled = true;
+    btn.textContent = 'กำลังส่ง...';
 
-    /* 
-      ── ส่งข้อมูลไปยัง backend / Google Apps Script ──
-      ตัวอย่าง: fetch('YOUR_APPS_SCRIPT_URL', {
+    try {
+      await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
+        mode: 'no-cors',
         body: JSON.stringify(payload)
       });
-    */
 
-    const ok = document.getElementById('success-msg');
-    ok.style.display = 'block';
-    setTimeout(() => ok.style.display = 'none', 5000);
+      const ok = document.getElementById('success-msg');
+      ok.style.display = 'block';
+      setTimeout(() => ok.style.display = 'none', 5000);
+      clearForm();
+      setTimeout(() => loadTWNW(), 2000);
+
+    } catch(err) {
+      errEl.textContent = '⚠ ส่งไม่สำเร็จ: ' + err.message;
+      errEl.style.display = 'block';
+      setTimeout(() => errEl.style.display = 'none', 5000);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'ส่งข้อมูล →';
+    }
   }
 
   function clearForm() {
