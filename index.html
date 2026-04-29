@@ -340,6 +340,67 @@
     color: var(--text-hint);
   }
 
+  /* Scrollable summary table wrapper — max 5 rows visible */
+  .summary-scroll-wrap {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+  }
+
+  .summary-scroll-wrap .summary-table {
+    margin-bottom: 0;
+  }
+
+  .summary-scroll-wrap thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .summary-scroll-wrap thead th {
+    border-top: none;
+  }
+
+  .summary-scroll-wrap tbody {
+    display: block;
+    max-height: calc(38px * 5); /* 38px ≈ row height (9px top + 9px bottom + 13px font + border) */
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .summary-scroll-wrap tbody::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .summary-scroll-wrap tbody::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .summary-scroll-wrap tbody::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+
+  .summary-scroll-wrap tbody::-webkit-scrollbar-thumb:hover {
+    background: var(--text-hint);
+  }
+
+  .summary-scroll-wrap thead,
+  .summary-scroll-wrap tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .summary-row-count {
+    font-size: 11px;
+    color: var(--text-hint);
+    text-align: right;
+    margin-top: 6px;
+  }
+
   .reload-btn {
     font-size: 12px;
     background: transparent;
@@ -407,9 +468,11 @@
     <table>
       <thead>
         <tr>
-          <th style="width:35%">บริษัทที่พบ</th>
-          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
-          <th style="width:37%">แนะนำให้เพื่อนได้ (ชื่อสมาชิก)</th>
+          <th style="width:22%">บริษัทที่พบ</th>
+          <th style="width:18%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+          <th style="width:22%">ธุรกิจของบริษัท</th>
+          <th style="width:20%">หมายเหตุ / โน้ตเพิ่มเติม</th>
+          <th style="width:18%">แนะนำให้เพื่อนได้ (ชื่อสมาชิก)</th>
         </tr>
       </thead>
       <tbody id="tw-body"></tbody>
@@ -426,9 +489,11 @@
     <table>
       <thead>
         <tr>
-          <th style="width:35%">บริษัทที่พบ</th>
-          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
-          <th style="width:37%">แนะนำให้เพื่อนได้ (ชื่อสมาชิก)</th>
+          <th style="width:22%">บริษัทที่พบ</th>
+          <th style="width:18%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+          <th style="width:22%">ธุรกิจของบริษัท</th>
+          <th style="width:20%">หมายเหตุ / โน้ตเพิ่มเติม</th>
+          <th style="width:18%">แนะนำให้เพื่อนได้ (ชื่อสมาชิก)</th>
         </tr>
       </thead>
       <tbody id="nw-body"></tbody>
@@ -456,16 +521,21 @@
       <div class="spinner" id="spinner-tw" style="display:block"></div>
       <span id="tw-summary-msg">กำลังโหลด...</span>
     </div>
-    <table class="summary-table" id="tw-summary-table" style="display:none">
-      <thead>
-        <tr>
-          <th style="width:33%">บริษัทที่เข้าพบ</th>
-          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
-          <th style="width:39%">แนะนำให้เพื่อน</th>
-        </tr>
-      </thead>
-      <tbody id="tw-summary-body"></tbody>
-    </table>
+    <div class="summary-scroll-wrap" id="tw-summary-wrap" style="display:none">
+      <table class="summary-table" id="tw-summary-table">
+        <thead>
+          <tr>
+            <th style="width:22%">บริษัทที่เข้าพบ</th>
+            <th style="width:18%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+            <th style="width:22%">ธุรกิจของบริษัท</th>
+            <th style="width:18%">หมายเหตุ</th>
+            <th style="width:20%">แนะนำให้เพื่อน</th>
+          </tr>
+        </thead>
+        <tbody id="tw-summary-body"></tbody>
+      </table>
+    </div>
+    <div class="summary-row-count" id="tw-row-count"></div>
   </div>
 
   <!-- Summary: Next Week planned -->
@@ -478,16 +548,21 @@
       <div class="spinner" id="spinner-nw" style="display:block"></div>
       <span id="nw-summary-msg">กำลังโหลด...</span>
     </div>
-    <table class="summary-table" id="nw-summary-table" style="display:none">
-      <thead>
-        <tr>
-          <th style="width:33%">บริษัทที่เข้าพบ</th>
-          <th style="width:28%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
-          <th style="width:39%">แนะนำให้เพื่อน</th>
-        </tr>
-      </thead>
-      <tbody id="nw-summary-body"></tbody>
-    </table>
+    <div class="summary-scroll-wrap" id="nw-summary-wrap" style="display:none">
+      <table class="summary-table" id="nw-summary-table">
+        <thead>
+          <tr>
+            <th style="width:22%">บริษัทที่เข้าพบ</th>
+            <th style="width:18%">ตำแหน่ง / ฝ่ายที่เข้าพบ</th>
+            <th style="width:22%">ธุรกิจของบริษัท</th>
+            <th style="width:18%">หมายเหตุ</th>
+            <th style="width:20%">แนะนำให้เพื่อน</th>
+          </tr>
+        </thead>
+        <tbody id="nw-summary-body"></tbody>
+      </table>
+    </div>
+    <div class="summary-row-count" id="nw-row-count"></div>
   </div>
 
   <div class="actions">
@@ -510,6 +585,8 @@
   const COL_BIZ    = 'บริษัท';
   const COL_POS    = 'ตำแหน่ง';
   const COL_WEEK        = 'Week';
+  const COL_BIZ_TYPE    = 'ธุรกิจ';
+  const COL_NOTE        = 'หมายเหตุ';
   const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyxGsD-j6fMJxoP_X_lLVPqq6iMfeQLjiQRclOBYZlEf5e2qNYOagD8CPEZKYdOOqS2-w/exec'; // ← วาง URL จาก Apps Script ที่นี่
   /* ─────────────────────────────── */
 
@@ -521,6 +598,8 @@
     tr.innerHTML = `
       <td><input type="text" placeholder="ชื่อบริษัท" /></td>
       <td><input type="text" placeholder="ตำแหน่ง / ฝ่าย" /></td>
+      <td><input type="text" placeholder="เช่น นำเข้าสินค้า, ซอฟต์แวร์" /></td>
+      <td><input type="text" placeholder="โน้ตเพิ่มเติม" /></td>
       <td><input type="text" placeholder="ชื่อเพื่อนสมาชิก" /></td>`;
     document.getElementById(id).appendChild(tr);
   }
@@ -607,6 +686,7 @@
       name, date,
       thisWeek: getTableData('tw-body'),
       nextWeek: getTableData('nw-body')
+      // columns order: [บริษัท, ตำแหน่ง, ธุรกิจ, หมายเหตุ, แนะนำให้เพื่อน]
     };
 
     btn.disabled = true;
@@ -670,40 +750,52 @@
         throw new Error(`ไม่พบ column ที่ต้องการใน Tab "${TAB_TWNW}"`);
 
       const iRecommend = cols.indexOf('แนะนำให้เพื่อน');
+      const iBizType   = cols.indexOf('ธุรกิจ');
+      const iNote      = cols.indexOf('หมายเหตุ');
 
       const rows = json.table.rows.map(r => ({
-        biz:       r.c[iBiz]?.v  || '',
-        pos:       r.c[iPos]?.v  || '',
-        week:      r.c[iWeek]?.v || '',
-        recommend: (iRecommend !== -1 && r.c[iRecommend]?.v) ? r.c[iRecommend].v : ''
+        biz:      r.c[iBiz]?.v  || '',
+        pos:      r.c[iPos]?.v  || '',
+        week:     r.c[iWeek]?.v || '',
+        bizType:  (iBizType !== -1  && r.c[iBizType]?.v)  ? r.c[iBizType].v  : '',
+        note:     (iNote !== -1     && r.c[iNote]?.v)     ? r.c[iNote].v     : '',
+        recommend:(iRecommend !== -1 && r.c[iRecommend]?.v) ? r.c[iRecommend].v : ''
       })).filter(r => r.biz);
 
       const twRows = rows.filter(r => r.week === 'This Week');
       const nwRows = rows.filter(r => r.week === 'Next Week');
 
-      function renderSummary(data, tbodyId) {
+      function renderSummary(data, tbodyId, wrapId, countId) {
         const tbody = document.getElementById(tbodyId);
         tbody.innerHTML = '';
         if (data.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="3" class="summary-empty">ยังไม่มีข้อมูล</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="summary-empty">ยังไม่มีข้อมูล</td></tr>`;
         } else {
           data.forEach(row => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${row.biz}</td>
               <td>${row.pos}</td>
+              <td>${row.bizType}</td>
+              <td>${row.note}</td>
               <td>${row.recommend}</td>`;
             tbody.appendChild(tr);
           });
         }
+        const countEl = document.getElementById(countId);
+        if (data.length > 5) {
+          countEl.textContent = `แสดง 5 จาก ${data.length} รายการ — เลื่อนดูเพิ่มเติม ↓`;
+        } else {
+          countEl.textContent = data.length > 0 ? `${data.length} รายการ` : '';
+        }
       }
 
-      renderSummary(twRows, 'tw-summary-body');
-      renderSummary(nwRows, 'nw-summary-body');
+      renderSummary(twRows, 'tw-summary-body', 'tw-summary-wrap', 'tw-row-count');
+      renderSummary(nwRows, 'nw-summary-body', 'nw-summary-wrap', 'nw-row-count');
 
       ['tw','nw'].forEach(p => {
         document.getElementById(`${p}-summary-status`).style.display = 'none';
-        document.getElementById(`${p}-summary-table`).style.display = 'table';
+        document.getElementById(`${p}-summary-wrap`).style.display = 'block';
       });
 
     } catch(e) {
