@@ -729,7 +729,7 @@
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TAB_TWNW)}`;
 
     ['tw','nw'].forEach(p => {
-      document.getElementById(`${p}-summary-table`).style.display = 'none';
+      document.getElementById(`${p}-summary-wrap`).style.display = 'none';
       document.getElementById(`${p}-summary-status`).style.display = 'flex';
       document.getElementById(`spinner-${p}`).style.display = 'block';
       document.getElementById(`${p}-summary-msg`).textContent = 'กำลังโหลด...';
