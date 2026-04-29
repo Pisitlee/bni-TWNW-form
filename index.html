@@ -374,12 +374,18 @@
 
   .summary-scroll-wrap thead th {
     border-top: none;
-    white-space: nowrap;
+    white-space: nowrap;        /* header ไม่ตัดบรรทัด */
+  }
+
+  .summary-scroll-wrap .summary-table tbody td {
+    white-space: normal;        /* cell ข้อมูล wrap ได้ตามปกติ */
+    word-break: break-word;
+    vertical-align: top;
   }
 
   .summary-scroll-wrap .summary-table tbody {
     display: block;
-    max-height: calc(38px * 5);
+    max-height: calc(44px * 5); /* เพิ่มความสูงเผื่อ wrap */
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
