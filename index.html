@@ -342,14 +342,29 @@
 
   /* Scrollable summary table wrapper — max 5 rows visible */
   .summary-scroll-wrap {
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
+    -webkit-overflow-scrolling: touch;
   }
 
   .summary-scroll-wrap .summary-table {
     margin-bottom: 0;
+    min-width: 620px;
+    table-layout: fixed;
   }
+
+  .summary-scroll-wrap thead th:nth-child(1),
+  .summary-scroll-wrap .summary-table tbody td:nth-child(1) { width: 22%; min-width: 120px; }
+  .summary-scroll-wrap thead th:nth-child(2),
+  .summary-scroll-wrap .summary-table tbody td:nth-child(2) { width: 18%; min-width: 100px; }
+  .summary-scroll-wrap thead th:nth-child(3),
+  .summary-scroll-wrap .summary-table tbody td:nth-child(3) { width: 22%; min-width: 120px; }
+  .summary-scroll-wrap thead th:nth-child(4),
+  .summary-scroll-wrap .summary-table tbody td:nth-child(4) { width: 18%; min-width: 100px; }
+  .summary-scroll-wrap thead th:nth-child(5),
+  .summary-scroll-wrap .summary-table tbody td:nth-child(5) { width: 20%; min-width: 110px; }
 
   .summary-scroll-wrap thead {
     position: sticky;
@@ -359,36 +374,25 @@
 
   .summary-scroll-wrap thead th {
     border-top: none;
+    white-space: nowrap;
   }
 
-  .summary-scroll-wrap tbody {
+  .summary-scroll-wrap .summary-table tbody {
     display: block;
-    max-height: calc(38px * 5); /* 38px ≈ row height (9px top + 9px bottom + 13px font + border) */
+    max-height: calc(38px * 5);
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
 
-  .summary-scroll-wrap tbody::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .summary-scroll-wrap tbody::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .summary-scroll-wrap tbody::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-  }
-
-  .summary-scroll-wrap tbody::-webkit-scrollbar-thumb:hover {
-    background: var(--text-hint);
-  }
+  .summary-scroll-wrap .summary-table tbody::-webkit-scrollbar { width: 6px; }
+  .summary-scroll-wrap .summary-table tbody::-webkit-scrollbar-track { background: transparent; }
+  .summary-scroll-wrap .summary-table tbody::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .summary-scroll-wrap .summary-table tbody::-webkit-scrollbar-thumb:hover { background: var(--text-hint); }
 
   .summary-scroll-wrap thead,
-  .summary-scroll-wrap tbody tr {
+  .summary-scroll-wrap .summary-table tbody tr {
     display: table;
     width: 100%;
     table-layout: fixed;
